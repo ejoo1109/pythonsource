@@ -3,15 +3,20 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.error import HTTPError
+from fake_useragent import UserAgent
 
 try:
+    # 객체 생성
+    userAgent = UserAgent()
+    headers = {"user-agent": userAgent.chrome}
 
     url = "https://finance.naver.com/"
 
     with requests.Session() as s:
         # get(), soup 객체 생성
-        s = requests.get(url)
+        s = requests.get(url, headers=headers)
         soup = BeautifulSoup(s.text, "html.parser")
+
 except HTTPError as e:
     print(e)
 else:
