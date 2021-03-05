@@ -6,8 +6,8 @@ import requests
 
 # postman에 있던 headers 키, 밸류 가져오기
 header_params = {
-    "X-Naver-Client-id": "XChSxv2fe1rP2E7snuD4",
-    "X-Naver-Client-Secret": "SULpKuVFlJ",
+    "X-Naver-Client-id": "아이디입력",
+    "X-Naver-Client-Secret": "비밀번호입력",
 }
 book_api = "https://openapi.naver.com/v1/search/book.json"
 
