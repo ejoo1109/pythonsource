@@ -7,9 +7,9 @@ from fake_useragent import UserAgent
 login_info = {
     "redirectUrl": "http://www.danawa.com/",
     "loginMemberType": "general",
-    "id": "",
+    "id": "아이디",
     "isSaveId": "true",
-    "password": "!!",
+    "password": "",
 }
 
 headers = {
