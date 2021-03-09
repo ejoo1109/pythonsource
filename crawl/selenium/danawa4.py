@@ -28,11 +28,6 @@ from io import BytesIO
 
 import time
 
-# 엑셀 저장과 관련된 코드
-workbook = openpyxl.Workbook()
-# 기본 워크시트 활성화
-worksheet = workbook.active
-
 # webdriver설정
 driver = webdriver.Chrome("./driver/chromedriver")
 
@@ -40,7 +35,7 @@ driver = webdriver.Chrome("./driver/chromedriver")
 driver.get("http://danawa.com")
 
 # 로그인 클릭
-driver.find_element_by_css_selector(".my_page_service").click()
+login = driver.find_element_by_css_selector(".my_page_service").click()
 
 # 아이디 입력
 userid = driver.find_element_by_id("danawa-member-login-input-id")
@@ -57,10 +52,84 @@ userpw.send_keys(Keys.ENTER)
 search = driver.find_element_by_id("AKCSearch")
 search.clear()
 search.send_keys("세탁기")
-search.send_keys(Keys.RETURN)
-time.sleep(3)
+search.send_keys(Keys.ENTER)
+
+# 검색결과가 나올 때까지 기다리기
+time.sleep(5)
 
 # 제조사 클릭
 driver.find_element_by_xpath(
     "//*[@id='SearchOption_Maker_Rep']/div[1]/div/label/span[1]"
 ).click()
+
+# 품목 클릭
+driver.find_element_by_xpath(
+    "//*[@id='newSearchOptionArea']/div[2]/div[2]/div[3]/div[1]/div[2]/div[1]/div[1]/div/label/span[2]"
+).click()
+
+# 세탁기 용량 더보기 클릭 후 기다리기
+WebDriverWait(driver, 3).until(
+    EC.presence_of_element_located(
+        (
+            By.XPATH,
+            "//*[@id='newSearchOptionArea']/div[2]/div[2]/div[4]/div[1]/div[2]/div[2]/button[1]",
+        )
+    )
+).click()
+
+# 18kg 클릭
+WebDriverWait(driver, 3).until(
+    EC.presence_of_element_located(
+        (
+            By.XPATH,
+            "//*[@id='SearchOption_RepOption_92_All']/div/div[9]/div/label/span",
+        )
+    )
+).click()
+
+# 클릭한 옵션에 따라 상품 내용이 페이지에 보여주기 위한 시간
+time.sleep(3)
+
+# 보여지는 상품 목록 중 첫번째 상품 클릭
+driver.find_element_by_css_selector(
+    "#productItem12964949 > div > div.prod_info > p > a"
+).click()
+
+# 새창으로 제어권 넘기기
+driver.switch_to.window(driver.window_handles[1])
+
+# 관심상품 클릭
+driver.find_element_by_css_selector("#interest > span.ico_interest").click()
+
+# 관심상품 담기
+WebDriverWait(driver, 5).until(
+    EC.presence_of_element_located(
+        (
+            By.XPATH,
+            "//*[@id='wishFolder_101516130']",
+        )
+    )
+).click()
+
+# 관심상품 리스트로 가기
+driver.find_element_by_css_selector(
+    "div.my_service_list3 > ul > li.interest_goods_service > a"
+).click()
+
+time.sleep(3)
+
+# 상세 페이지
+soup = BeautifulSoup(driver.page_source, "html.parser")
+
+
+wishlist = soup.select("#wishProductListArea > table > tbody > tr")
+
+for idx, item in enumerate(wishlist, 1):
+    product_name = item.select_one("td.info > div.tit > a").text
+    product_spec = item.select_one("td.info > dl.spec > dd > a").text
+    product_price = item.select_one("td.lowest > dl > div.cost > span > em").text
+
+    print("[{}] {}".format(idx, product_name))
+    print("{}".format(product_spec))
+    print("{}".format(product_price))
+    print()
