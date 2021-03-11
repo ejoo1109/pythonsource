@@ -30,6 +30,7 @@ import time
 
 # webdriver설정
 driver = webdriver.Chrome("./driver/chromedriver")
+driver.implicitly_wait(3)
 
 # 특정 사이트 지정
 driver.get("http://danawa.com")
@@ -57,12 +58,16 @@ search.send_keys(Keys.ENTER)
 # 검색결과가 나올 때까지 기다리기
 time.sleep(5)
 
-# 제조사 클릭
-driver.find_element_by_xpath(
-    "//*[@id='SearchOption_Maker_Rep']/div[1]/div/label/span[1]"
+# 제조사 클릭 - LG전자
+WebDriverWait(driver, 3).until(
+    EC.presence_of_element_located(
+        (
+            By.XPATH,
+            "//*[@id='SearchOption_Maker_Rep']/div[2]/div/label/span[1]",
+        )
+    )
 ).click()
-
-# 품목 클릭
+# 품목 클릭- 세탁기+건조기
 driver.find_element_by_xpath(
     "//*[@id='newSearchOptionArea']/div[2]/div[2]/div[3]/div[1]/div[2]/div[1]/div[1]/div/label/span[2]"
 ).click()
@@ -98,18 +103,30 @@ driver.find_element_by_css_selector(
 # 새창으로 제어권 넘기기
 driver.switch_to.window(driver.window_handles[1])
 
-# 관심상품 클릭
-driver.find_element_by_css_selector("#interest > span.ico_interest").click()
+# 새 페이지에서 제품 상세가 보여지는 시간 주기
+time.sleep(4)
 
-# 관심상품 담기
-WebDriverWait(driver, 5).until(
-    EC.presence_of_element_located(
-        (
-            By.XPATH,
-            "//*[@id='wishFolder_101516130']",
-        )
+# 관심상품 클릭 - 이미 관심상품 리스트에 존재하는 상황이라면
+# 관심상품 담아놨던 게 해제되어 버림
+# 이미 관심상품을 담아놨다면 클릭이 안되도록 하려면?
+
+soup = BeautifulSoup(driver.page_source, "html.parser")
+
+# 관심(하트)에 해당하는 영역 가져오기
+element = soup.select_one("#btn_bundle > ul > li.item.interest")
+# print("element", element['class'])
+
+if "on" not in element["class"]:
+    # 관심 클릭
+    driver.find_element_by_css_selector("#interest > span.ico_interest").click()
+    # 저장할 폴더 클릭
+    driver.find_element_by_css_selector(
+        "#btn_bundle > div > di.wish_folder > dd > ul > li"
     )
-).click()
+
+time.sleep(3)
+
+del soup
 
 # 관심상품 리스트로 가기
 driver.find_element_by_css_selector(
@@ -121,15 +138,16 @@ time.sleep(3)
 # 상세 페이지
 soup = BeautifulSoup(driver.page_source, "html.parser")
 
-
 wishlist = soup.select("#wishProductListArea > table > tbody > tr")
 
 for idx, item in enumerate(wishlist, 1):
     product_name = item.select_one("td.info > div.tit > a").text
     product_spec = item.select_one("td.info > dl.spec > dd > a").text
-    product_price = item.select_one("td.lowest > dl > div.cost > span > em").text
+    product_price = item.select_one(
+        "td.lowest > dl > div.cost > span > em"
+    ).text.strip()
 
     print("[{}] {}".format(idx, product_name))
-    print("{}".format(product_spec))
-    print("{}".format(product_price))
+    print("[{}] {}".format(idx, product_spec))
+    print("[{}] {}".format(idx, product_price))
     print()
