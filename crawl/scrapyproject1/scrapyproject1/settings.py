@@ -20,12 +20,16 @@ NEWSPIDER_MODULE = "scrapyproject1.spiders"
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+# 병행처리하는 프로세스 개수
+CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 3
+
+# 동일한 사이트에 대해서 몇 초 간격으로 시도를 할 것인가?
+DOWNLOAD_DELAY = 3
+
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -81,8 +85,26 @@ ROBOTSTXT_OBEY = False
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-# HTTPCACHE_ENABLED = True
-# HTTPCACHE_EXPIRATION_SECS = 0
-# HTTPCACHE_DIR = 'httpcache'
+
+# 캐시 사용여부
+HTTPCACHE_ENABLED = True
+# 캐시 유효 시간
+HTTPCACHE_EXPIRATION_SECS = 300
+# 캐시 저장 경로
+HTTPCACHE_DIR = "httpcache"
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# 오류 처리
+
+# 자동 재시도 설정 : 서버 측 오류로 인해 데이터가 전송되지 못할 때
+RETRY_ENABLED = True
+
+# 재시도 횟수 최대값
+RETRY_TIMES = 2
+
+# 재시도 대상 HTTP 코드
+RETRY_HTTP_CODES = [500, 502, 503, 504, 408]
+
+# 오류 무시 HTTP 코드
+HTTPERROR_ALLOWED_CODES = [404]
